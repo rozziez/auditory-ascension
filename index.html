@@ -163,21 +163,30 @@
     text-align: left;
     flex: 1 1 auto;
     min-width: 0;            /* allow the text column to shrink within the row */
+    /* The dog (191px) stays the focal point — never let the title stack tower
+       over him. Cap the text column near the dog's height and center it. */
+    max-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .header-text h1 { margin-bottom: 6px; }
-  /* Fit the one-line title to the available column width (scales down only if
-     it would otherwise overflow next to the dog). Centered in the text column. */
-  h1 .maker { white-space: nowrap; font-size: 35px; text-align: center; }
-  /* "Ear Atelier" enlarged and centered. Allowed to wrap so it never clips. */
-  .title-line.title-centered { font-size: 44px; text-align: center; line-height: 1.0; }
+  /* All title lines behave the same: one line, scaling with the column width
+     (shrinking on narrow screens, growing up to a desktop cap) instead of
+     wrapping. The clamp maxes match the prior fixed sizes so desktop is
+     unchanged; the dog stays the focal point via the .header-text max-height. */
+  h1 .maker { white-space: nowrap; font-size: clamp(18px, 6vw, 35px); text-align: center; }
+  /* "Ear Atelier" — same single-line scale-to-fit behavior. */
+  .title-line.title-centered { white-space: nowrap; font-size: clamp(22px, 7.6vw, 44px); text-align: center; line-height: 1.0; }
   /* The dramatic two-line subtitle, small font matching the crest. */
   .subtitle-centered {
-    font-size: 7px;
+    white-space: nowrap;
+    font-size: clamp(5px, 1.4vw, 7px);
     letter-spacing: 0.08em;
     line-height: 1.5;
   }
   /* "No. 13" crest sized to match the subtitle (smaller than before). */
-  .crest-stacked { font-size: 7px; }
+  .crest-stacked { white-space: nowrap; font-size: clamp(5px, 1.4vw, 7px); }
   @media (max-width: 420px) {
     .header-row { gap: 12px; }
   }
@@ -358,7 +367,7 @@
     transition: color 0.1s;
   }
   .quick-row button:hover { color: var(--brass-bright); }
-  .quick-row .sep { color: var(--brass-deep); }
+  .quick-row .sep { color: var(--brass-deep); font-size: 8px; vertical-align: middle; }
 
   .play-grid {
     display: grid;
@@ -432,7 +441,6 @@
   .actions.play-row .action-btn {
     min-width: 0;
     padding: 14px 8px;
-    font-size: 14px;
     white-space: nowrap;
   }
 
@@ -444,8 +452,8 @@
     color: var(--paper);
     border: 1px solid var(--brass);
     border-radius: 3px;
-    font-family: 'EB Garamond', Garamond, serif;
-    font-size: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.02em;
     cursor: pointer;
@@ -702,37 +710,35 @@
 
   .mode-toggle {
     display: flex;
-    gap: 0;
-    border: 1px solid rgba(201, 136, 42, 0.22);
-    border-radius: 3px;
-    overflow: hidden;
+    gap: 8px;
     width: fit-content;
     flex-wrap: wrap;
   }
   .mode-toggle button {
-    padding: 8px 14px;
+    padding: 11px 16px;
     background: transparent;
-    color: var(--muted);
-    border: none;
+    color: var(--paper-dim);
+    border: 1px solid rgba(201, 136, 42, 0.22);
+    border-radius: 3px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     cursor: pointer;
-    transition: all 0.12s;
+    transition: all 0.12s ease;
   }
+  .mode-toggle button:hover { border-color: var(--brass); color: var(--paper); }
   .mode-toggle button:focus,
   .mode-toggle button:focus-visible { outline: none; }
   .mode-toggle button.active {
     background: var(--brass);
     color: var(--bg);
+    border-color: var(--brass);
+    box-shadow: 0 0 0 1px rgba(230, 168, 71, 0.4), 0 4px 12px -4px rgba(201, 136, 42, 0.5);
   }
-  .mode-toggle button:not(.active),
-  .mode-toggle button:not(.active):hover,
+  .mode-toggle button:active { transform: scale(0.96); }
   .mode-toggle button:not(.active):focus,
-  .mode-toggle button:not(.active):active {
-    color: var(--muted);
-  }
+  .mode-toggle button:not(.active):active { color: var(--paper-dim); }
   /* ===== Top task-selector bar (Tone / Interval / Two-Note / Chord) ===== */
   .task-bar {
     display: flex;
@@ -751,8 +757,9 @@
     border-radius: 4px;
     color: var(--muted);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.16em;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s;
@@ -794,12 +801,13 @@
   /* Items that own sub-panels (volume, noise, distractor) get their own wrapper
      so they can grow to full width when bloomed without disturbing the cloud. */
   .diff-bloom { display: flex; flex-direction: column; flex: 0 0 auto; }
+  .diff-bloom[hidden] { display: none; }
   .diff-bloom.open { flex: 1 1 100%; }
   .diff-pill {
-    padding: 8px 13px; background: transparent;
-    border: 1px solid rgba(201,136,42,0.22); border-radius: 999px;
+    padding: 11px 13px; background: transparent;
+    border: 1px solid rgba(201,136,42,0.22); border-radius: 3px;
     color: var(--muted); font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.02em;
     cursor: pointer; transition: all 0.16s ease; text-align: center;
     white-space: nowrap; flex: 0 0 auto;
     display: inline-flex; align-items: center; gap: 6px;
@@ -813,7 +821,7 @@
      They sit in one rounded shell so they read as a single pill. */
   .diff-shell {
     display: inline-flex; align-items: stretch; flex: 0 0 auto;
-    border: 1px solid rgba(201,136,42,0.22); border-radius: 999px;
+    border: 1px solid rgba(201,136,42,0.22); border-radius: 3px;
     overflow: hidden; transition: all 0.16s ease;
   }
   .diff-shell .diff-pill {
@@ -838,12 +846,12 @@
   .diff-caret:hover { color: var(--paper-dim); background: rgba(201,136,42,0.08); }
   .diff-shell[data-on="true"] .diff-caret {
     color: var(--bg); border-left-color: rgba(26,20,16,0.35);
-    background: rgba(0,0,0,0.06);
+    background: var(--brass);
   }
   .diff-bloom.open .diff-caret { transform: rotate(180deg); }
   /* When open, the shell squares its bottom to merge with the reveal panel. */
   .diff-bloom.open > .diff-shell {
-    align-self: stretch; border-radius: 16px 16px 0 0;
+    align-self: stretch; border-radius: 3px 3px 0 0;
     border-color: var(--brass);
     box-shadow: 0 0 12px -3px rgba(201,136,42,0.55);
   }
@@ -873,7 +881,7 @@
   /* The revealed panel — the "juicy" part. Animates open from the pill. */
   .diff-reveal {
     border: 1px solid var(--brass); border-top: none;
-    border-radius: 0 0 16px 16px;
+    border-radius: 0 0 3px 3px;
     background: rgba(201,136,42,0.06);
     padding: 12px 14px;
     display: flex; flex-direction: column; gap: 12px;
@@ -1411,6 +1419,7 @@
   }
   .legend-toggle .ic { color: var(--brass-deep); font-size: 9px; }
   .legend-chev { transition: transform 0.18s ease; }
+  .legend-chev-static { display: inline-block; }
   .legend-toggle[aria-expanded="true"] .legend-chev { transform: rotate(180deg); }
   .legend-grid {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; margin-bottom: 14px;
@@ -1499,6 +1508,8 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .field-label-row .unlock-pill { margin-left: 0; }
+  .field-label-row .push-right { margin-left: auto; }
+  .note-unlock-pill { cursor: default; }
 
   /* Small clickable unlock-count pill sitting next to the TIMBRE label */
   .unlock-pill {
@@ -1705,7 +1716,7 @@
   <div class="panel">
 
     <div class="field">
-      <div class="field-label field-label-row">Timbre <button class="unlock-pill" id="unlock-pill" aria-expanded="false"></button></div>
+      <div class="field-label field-label-row">Timbres in the pool<button class="unlock-pill push-right" id="unlock-pill" aria-expanded="false"></button></div>
       <div class="challenge-banner" id="challenge-banner" hidden></div>
       <div class="timbre-sections" id="timbre-grid"></div>
     </div>
@@ -1713,18 +1724,19 @@
     <div class="field">
       <div class="field-label field-label-row">Notes in the pool
         <button class="legend-toggle" id="legend-toggle" aria-expanded="false">
-          <span class="ic">◆</span> Note colors <span class="legend-chev">▾</span>
+          <span class="legend-chev-static">▾</span> Colors <span class="legend-chev">▾</span>
         </button>
+        <span class="unlock-pill note-unlock-pill push-right" id="note-unlock-pill"></span>
       </div>
-      <div class="legend-grid" id="legend-grid" hidden></div>
       <div class="chip-grid" id="note-chips"></div>
+      <div class="legend-grid" id="legend-grid" hidden></div>
       <div class="quick-row">
         <button data-notes="all">All 12</button>
-        <span class="sep">·</span>
+        <span class="sep">◆</span>
         <button data-notes="natural">Naturals</button>
-        <span class="sep">·</span>
+        <span class="sep">◆</span>
         <button data-notes="accidental">Sharps/Flats</button>
-        <span class="sep">·</span>
+        <span class="sep">◆</span>
         <button data-notes="clear">Clear</button>
       </div>
     </div>
@@ -1734,9 +1746,9 @@
       <div class="chip-grid" id="octave-chips"></div>
       <div class="quick-row">
         <button data-oct="middle">Middle (3-5)</button>
-        <span class="sep">·</span>
+        <span class="sep">◆</span>
         <button data-oct="all">All</button>
-        <span class="sep">·</span>
+        <span class="sep">◆</span>
         <button data-oct="clear">Clear</button>
       </div>
     </div>
@@ -1765,7 +1777,7 @@
     </div>
 
     <div class="field" id="difficulty-field">
-      <div class="field-label">Difficulty modifiers</div>
+      <div class="field-label field-label-row">Difficulty modifiers<span class="unlock-pill note-unlock-pill push-right" id="diff-unlock-pill"></span></div>
       <div class="diff-grid">
         <div class="diff-bloom" id="diff-noise-bloom">
         <div class="diff-shell" data-on="false">
@@ -1881,9 +1893,6 @@
           </div>
         </div>
 
-        <div class="diff-shell" data-on="false" id="noreplay-shell">
-          <button class="diff-pill" id="diff-noreplay" aria-pressed="false">No replay</button>
-        </div>
 
         <div class="diff-bloom" id="diff-pan-bloom">
         <div class="diff-shell" data-on="false">
@@ -1896,6 +1905,21 @@
               <span class="diff-slider-label">width</span>
               <input type="range" id="diff-pan-width" min="20" max="100" value="100" step="1" class="diff-slider" />
               <span class="diff-slider-val" id="diff-pan-width-val">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-bloom" id="diff-noreplay-bloom">
+          <div class="diff-shell" data-on="false">
+            <button class="diff-pill" id="diff-noreplay" aria-pressed="false">Replay</button>
+            <button class="diff-caret" id="diff-noreplay-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="diff-noreplay-sub" hidden>
+            <p class="diff-desc">Repeats the tone for you on a timer, just like spamming the replay button — so you can sit inside the attack. Slide from no replay at all, up to as fast as you could press it.</p>
+            <div class="diff-slider-row">
+              <span class="diff-slider-label">cadence</span>
+              <input type="range" id="diff-replay-rate" min="0" max="20" value="0" step="1" class="diff-slider" />
+              <span class="diff-slider-val" id="diff-replay-rate-val">no replay</span>
             </div>
           </div>
         </div>
@@ -2281,7 +2305,7 @@
   function createProfile(name) {
     const p = { id: 'p' + Date.now() + Math.floor(Math.random()*1000),
                 name: name.slice(0, 20), created: Date.now(), sessions: [],
-                unlocked: ['sine'], challenge: null };
+                unlocked: ['sine'], unlockedNotes: [0], unlockedDiffs: ['replay'], challenge: null };
     store.profiles.push(p); store.currentId = p.id; saveStore(); return p;
   }
 
@@ -2312,6 +2336,90 @@
   const SINN_UNLOCK_CHAIN = [
     'realclarinet', 'piano', 'realpiano', 'dialed', 'realtrumpet', 'realviolin'
   ];
+
+  // ---- NOTE unlock chain. Everyone starts with only C (index 0). SINN's
+  // FIRST 11 completions unlock these 11 notes (in maximally-even order:
+  // tritone first, then the diminished-7th, then progressively filling the
+  // gaps), AFTER which SINN completions fall through to the timbre chain.
+  // Indices: C0 C#1 D2 D#3 E4 F5 F#6 G7 G#8 A9 A#10 B11.
+  const NOTE_UNLOCK_CHAIN = [6, 9, 3, 8, 2, 5, 11, 4, 10, 1, 7];
+  const TOTAL_NOTES = 12;
+
+  // ---- DIFFICULTY unlock chain. Everyone starts with only 'replay'. The other
+  // 10 difficulties unlock concurrently with SINN completions, on this schedule:
+  //   SINN#1 +volume, #3 +countdown, #5 +detune, #7 +distractor, #9 +duration,
+  //   #11 +noise(Ambience), then in the timbre phase #13 +attack, #15 +pan,
+  //   #17 +masking, #19 +vibrato. (Every-other release cadence.) Replay is free,
+  //   so 1 free + 10 earned = 11 total.
+  // Each entry is the SINN completion number -> difficulty key (DOM bloom id stem).
+  const DIFF_UNLOCK_SCHEDULE = {
+    1:  'volume',
+    3:  'countdown',
+    5:  'detune',
+    7:  'distractor',
+    9:  'duration',
+    11: 'noise',
+    13: 'attack',
+    15: 'pan',
+    17: 'masking',
+    19: 'vibrato'
+  };
+  const TOTAL_DIFFS = 11; // replay + 10
+  // Map a difficulty key to its bloom element id.
+  const DIFF_BLOOM_ID = {
+    replay: 'diff-noreplay-bloom', volume: 'vol-bloom', countdown: 'diff-countdown-bloom',
+    detune: 'diff-detune-bloom', distractor: 'diff-distractor-bloom', duration: 'diff-duration-bloom',
+    noise: 'diff-noise-bloom', attack: 'diff-attack-bloom', pan: 'diff-pan-bloom',
+    masking: 'diff-masking-bloom', vibrato: 'diff-vibrato-bloom'
+  };
+  const DIFF_LABEL = {
+    replay: 'Replay', volume: 'Volume', countdown: 'Countdown', detune: 'Detune',
+    distractor: 'Distractor tone', duration: 'Duration randomization', noise: 'Ambience',
+    attack: 'Attack randomization', pan: 'Pan randomization', masking: 'Masking', vibrato: 'Vibrato'
+  };
+  function ensureDiffUnlock(p) {
+    if (!p) return;
+    if (!p.unlockedDiffs) p.unlockedDiffs = ['replay'];        // start: replay only
+    if (p.unlockedDiffs.indexOf('replay') === -1) p.unlockedDiffs.unshift('replay');
+  }
+  function unlockedDiffSet() {
+    if (isDevMode()) return Object.keys(DIFF_BLOOM_ID);        // dev: all
+    const p = currentProfile();
+    if (!p) return ['replay'];                                 // guest: replay only
+    ensureDiffUnlock(p);
+    return p.unlockedDiffs.slice();
+  }
+  // Show/hide each difficulty bloom based on what's unlocked.
+  function refreshDiffVisibility() {
+    const u = unlockedDiffSet();
+    Object.keys(DIFF_BLOOM_ID).forEach(function(key){
+      const el = document.getElementById(DIFF_BLOOM_ID[key]);
+      if (el) el.hidden = (u.indexOf(key) === -1);
+    });
+  }
+  function updateDiffUnlockPill() {
+    const pill = document.getElementById('diff-unlock-pill');
+    if (!pill) return;
+    pill.textContent = '(' + unlockedDiffSet().length + '/' + TOTAL_DIFFS + ' unlocked)';
+  }
+  function ensureNoteUnlock(p) {
+    if (!p) return;
+    if (!p.unlockedNotes) p.unlockedNotes = [0];            // start: only C
+    if (p.unlockedNotes.indexOf(0) === -1) p.unlockedNotes.unshift(0);
+  }
+  function unlockedNoteSet() {
+    if (isDevMode()) return [0,1,2,3,4,5,6,7,8,9,10,11];     // dev: all notes
+    const p = currentProfile();
+    if (!p) return [0];                                     // guest: C only
+    ensureNoteUnlock(p);
+    return p.unlockedNotes.slice().sort(function(a,b){return a-b;});
+  }
+  function nextNoteUnlock(p) {
+    for (let i = 0; i < NOTE_UNLOCK_CHAIN.length; i++) {
+      if (p.unlockedNotes.indexOf(NOTE_UNLOCK_CHAIN[i]) === -1) return NOTE_UNLOCK_CHAIN[i];
+    }
+    return null; // all notes unlocked
+  }
   function ensureUnlockFields(p) {
     if (!p) return;
     if (!p.unlocked) p.unlocked = ['sine'];
@@ -2366,23 +2474,50 @@
     const p = currentProfile();
     if (!p) return null;
     ensureUnlockFields(p);
-    if (lockedTimbres().length === 0) return null;        // nothing left
+    ensureNoteUnlock(p);
+    ensureDiffUnlock(p);
+    // Track which SINN completion this is (1-based), to drive the difficulty schedule.
+    if (typeof p.sinnCompletions !== 'number') p.sinnCompletions = 0;
+    p.sinnCompletions += 1;
+    const diffKey = DIFF_UNLOCK_SCHEDULE[p.sinnCompletions];
+    let diffUnlocked = null;
+    if (diffKey && p.unlockedDiffs.indexOf(diffKey) === -1) {
+      p.unlockedDiffs.push(diffKey);
+      diffUnlocked = diffKey;
+    }
+    // PHASE 1: unlock notes until all 12 are earned.
+    const notepick = nextNoteUnlock(p);
+    if (notepick !== null) {
+      p.unlockedNotes.push(notepick);
+      p.sinnBest = null;
+      saveStore();
+      return { kind: 'note', idx: notepick, diff: diffUnlocked };
+    }
+    // PHASE 2: notes done — unlock timbres along the existing chain.
+    if (lockedTimbres().length === 0) {
+      // Everything tonal is unlocked; still report a difficulty if one landed.
+      if (diffUnlocked) { saveStore(); return { kind: 'diff', diff: diffUnlocked }; }
+      return null;
+    }
     const pick = nextUnlockTarget(p);
     if (!pick) return null;
     p.unlocked.push(pick);
-    p.challenge = pick;                                   // track most-recent unlock
-    p.sinnBest = null;                                    // reset best-attempt for the new gate
-    if (lockedTimbres().length === 0) p.challenge = null; // all done
+    p.challenge = pick;
+    p.sinnBest = null;
+    if (lockedTimbres().length === 0) p.challenge = null;
     saveStore();
-    return pick;
+    return { kind: 'timbre', name: pick, diff: diffUnlocked };
   }
+  // When notes are done but a difficulty is still scheduled and timbres are all
+  // unlocked too, we may still owe a difficulty. Handle the residual case where
+  // the function returned null above but a diff was unlocked this completion.
 
   function deleteProfile(id) {
     store.profiles = store.profiles.filter(function(p){ return p.id !== id; });
     if (store.currentId === id) store.currentId = store.profiles[0] ? store.profiles[0].id : null;
     saveStore();
   }
-  function switchProfile(id) { store.currentId = id; saveStore(); renderAccountBar(); applyDevModeClass(); }
+  function switchProfile(id) { store.currentId = id; saveStore(); renderAccountBar(); applyDevModeClass(); if (typeof buildNoteChips==='function') buildNoteChips(); if (typeof updateNoteUnlockPill==='function') updateNoteUnlockPill(); if (typeof refreshDiffVisibility==='function') refreshDiffVisibility(); if (typeof updateDiffUnlockPill==='function') updateDiffUnlockPill(); }
 
   function comboLabel(game, quiz) {
     const g = game === 'sinn' ? 'SINN' : game === 'competition' ? 'Competition' : 'Grind';
@@ -2434,7 +2569,7 @@
       badge.textContent = p.name.charAt(0).toUpperCase();
       name.childNodes[0].nodeValue = p.name;
       const n = p.sessions.length;
-      tag.textContent = n ? (n + ' session' + (n>1?'s':'') + ' logged') : 'New profile — go set a record';
+      tag.textContent = n ? (n + ' session' + (n>1?'s':'') + ' logged') : 'New profile ◆ go listen';
     } else {
       badge.textContent = '?';
       name.childNodes[0].nodeValue = 'Guest';
@@ -2545,9 +2680,34 @@
     pill.setAttribute('aria-expanded', String(unlockBannerOpen));
   }
 
-  function showUnlockPopup(timbre) {
-    document.getElementById('unlock-timbre-name').textContent = TIMBRE_LABELS[timbre];
-    document.getElementById('unlock-timbre-desc').textContent = TIMBRE_DESC[timbre];
+  function updateNoteUnlockPill() {
+    const pill = document.getElementById('note-unlock-pill');
+    if (!pill) return;
+    const count = unlockedNoteSet().length;
+    pill.textContent = '(' + count + '/' + TOTAL_NOTES + ' unlocked)';
+  }
+
+  function showUnlockPopup(unlock) {
+    // unlock is { kind:'note', idx } or { kind:'timbre', name } (or a bare
+    // timbre string for backward-compat).
+    let name, desc;
+    if (typeof unlock === 'string') {
+      name = TIMBRE_LABELS[unlock]; desc = TIMBRE_DESC[unlock];
+    } else if (unlock.kind === 'note') {
+      name = NOTE_NAMES[unlock.idx] + ' \u2014 ' + NOTE_COLOR_NAMES[unlock.idx];
+      desc = 'A new note enters your pool. SINN now tests it alongside the others.';
+    } else if (unlock.kind === 'diff') {
+      name = DIFF_LABEL[unlock.diff];
+      desc = 'A new difficulty modifier is now available to switch on.';
+    } else {
+      name = TIMBRE_LABELS[unlock.name]; desc = TIMBRE_DESC[unlock.name];
+    }
+    // If a difficulty unlocked alongside a note/timbre, append a note about it.
+    if (unlock.diff && unlock.kind !== 'diff') {
+      desc += ' Also unlocked: the ' + DIFF_LABEL[unlock.diff] + ' modifier.';
+    }
+    document.getElementById('unlock-timbre-name').textContent = name;
+    document.getElementById('unlock-timbre-desc').textContent = desc;
     document.getElementById('unlock-scrim').classList.add('show');
   }
 
@@ -2822,7 +2982,8 @@
     durationCeil: 1.6,   // longest random tone length; lower = shorter/harder (slider 0.6..2.2)
     maskingLevel: 0.35,  // peak gain of the masking burst (slider 10..70%)
     attackProb: 0.5,     // chance a given tone gets the onset-hiding fade (slider 20..100%)
-    noReplay: false      // disable the replay button — hear each tone only once
+    noReplay: false,     // far-left of the Replay slider: button disabled, hear each tone once
+    autoReplayMs: 0      // >0 = auto-repeat the tone every this-many ms (mimics spamming the button)
   };
   // The "fair zone" edges, shown as markers on the self-harm sliders.
   const DISTRACTOR_FAIR_SEP = 7;   // >= ~7 semitones reads as clearly separate
@@ -4334,7 +4495,9 @@
   function buildNoteChips() {
     const c = document.getElementById('note-chips');
     c.innerHTML = '';
+    const unlockedNotes = unlockedNoteSet();
     NOTE_NAMES.forEach(function(name, idx) {
+      if (unlockedNotes.indexOf(idx) === -1) return; // locked — hide entirely
       const chip = document.createElement('button');
       const sel = selectedNotes.indexOf(idx) !== -1;
       if (colorMode) {
@@ -4471,10 +4634,12 @@
   document.querySelectorAll('[data-notes]').forEach(function(b) {
     b.addEventListener('click', function() {
       const mode = b.getAttribute('data-notes');
-      if (mode === 'all') selectedNotes = [0,1,2,3,4,5,6,7,8,9,10,11];
-      else if (mode === 'natural') selectedNotes = NATURAL_INDICES.slice();
-      else if (mode === 'accidental') selectedNotes = [1,3,6,8,10];
-      else if (mode === 'cmajor') selectedNotes = CMAJOR_INDICES.slice();
+      const unlockedNotes = unlockedNoteSet();
+      const keep = function(arr){ return arr.filter(function(n){ return unlockedNotes.indexOf(n) !== -1; }); };
+      if (mode === 'all') selectedNotes = unlockedNotes.slice();
+      else if (mode === 'natural') selectedNotes = keep(NATURAL_INDICES.slice());
+      else if (mode === 'accidental') selectedNotes = keep([1,3,6,8,10]);
+      else if (mode === 'cmajor') selectedNotes = keep(CMAJOR_INDICES.slice());
       else if (mode === 'clear') selectedNotes = [];
       buildNoteChips();
       buildPlayGrid();
@@ -4540,7 +4705,6 @@
     wireToggle('diff-attack', 'attack');
     wireToggle('diff-detune', 'detune');
     wireToggle('diff-vibrato', 'vibrato');
-    wireToggle('diff-noreplay', 'noReplay');
     wireToggle('diff-countdown', 'countdown');
     wireToggle('diff-distractor', 'distractor');
 
@@ -4554,6 +4718,7 @@
     wireCaret('diff-vibrato-caret', 'diff-vibrato-bloom', 'diff-vibrato-sub');
     wireCaret('diff-countdown-caret', 'diff-countdown-bloom', 'diff-countdown-sub');
     wireCaret('diff-distractor-caret', 'diff-distractor-bloom', 'diff-distractor-panel');
+    wireCaret('diff-noreplay-caret', 'diff-noreplay-bloom', 'diff-noreplay-sub');
 
     // ---- Simple value sliders (label updates + difficulty write) ----
     function bindSlider(id, fn){
@@ -4568,6 +4733,52 @@
     bindSlider('diff-masking-level', function(v, out){ difficulty.maskingLevel = v/100; if(out) out.textContent = v + '%'; });
     bindSlider('diff-pan-width', function(v, out){ difficulty.panWidth = v/100; if(out) out.textContent = v + '%'; });
     bindSlider('diff-vibrato-depth', function(v, out){ difficulty.vibratoDepthMul = v/100; if(out) out.textContent = (v/100).toFixed(1) + '\u00D7'; });
+
+    // ---- Replay modifier (custom): body enables/disables; slider sets cadence.
+    // Slider 0   = "no replay" (button disabled, hardest).
+    // Slider 1..20 maps to an auto-replay interval from ~2500ms (slow) down to
+    // ~400ms (about as fast as a person can spam the button).
+    (function(){
+      const body = document.getElementById('diff-noreplay');
+      const shell = body ? body.closest('.diff-shell') : null;
+      const slider = document.getElementById('diff-replay-rate');
+      const out = document.getElementById('diff-replay-rate-val');
+      let replayOn = false;
+      function rateToMs(v){
+        // v in 1..20 -> 2500ms..400ms (linear)
+        if (v <= 0) return 0;
+        const lo = 400, hi = 2500;
+        return Math.round(hi - (hi - lo) * ((v - 1) / 19));
+      }
+      function label(v){
+        if (v <= 0) return 'no replay';
+        const ms = rateToMs(v);
+        return (ms/1000).toFixed(ms % 1000 === 0 ? 0 : 1) + 's';
+      }
+      function apply(initial){
+        const v = slider ? parseInt(slider.value, 10) : 0;
+        if (out) out.textContent = label(v);
+        if (replayOn) {
+          difficulty.noReplay = (v <= 0);
+          difficulty.autoReplayMs = (v <= 0) ? 0 : rateToMs(v);
+        } else {
+          difficulty.noReplay = false;
+          difficulty.autoReplayMs = 0;
+        }
+        // If a tone is live, restart the auto-replay loop to reflect changes.
+        // Skip during the initial wire-up call (no tone yet, and the engine
+        // functions may not be initialized at this point).
+        if (!initial) { stopAutoReplay(); if (replayOn) startAutoReplay(); }
+      }
+      if (body) body.addEventListener('click', function(){
+        replayOn = !replayOn;
+        body.setAttribute('aria-pressed', String(replayOn));
+        if (shell) shell.setAttribute('data-on', String(replayOn));
+        apply(false);
+      });
+      if (slider) slider.addEventListener('input', function(){ apply(false); });
+      apply(true);
+    })();
 
     // Noise color segmented control
     document.querySelectorAll('#diff-noise-sub .diff-seg').forEach(function(seg){
@@ -4748,12 +4959,16 @@
       return candidates[candidates.length - 1];
     }
 
+    // SINN ignores the manual chip selection and quizzes EVERY unlocked note
+    // (mirroring how it pulls from every unlocked timbre). Other modes use the
+    // player's selected note pool.
+    const notePool = (gameMode === 'sinn') ? unlockedNoteSet() : selectedNotes;
     let note, oct;
     if (gameMode === 'casual' && sessionWeak) {
-      note = weightedPick(selectedNotes, sessionWeak.notes);
+      note = weightedPick(notePool, sessionWeak.notes);
       oct = weightedPick(selectedOctaves, sessionWeak.octs);
     } else {
-      note = selectedNotes[Math.floor(Math.random() * selectedNotes.length)];
+      note = notePool[Math.floor(Math.random() * notePool.length)];
       oct = selectedOctaves[Math.floor(Math.random() * selectedOctaves.length)];
     }
     // SINN: roll a fresh random timbre for this question, but only from the
@@ -4806,6 +5021,8 @@
       // Difficulty: start the answer countdown bar if enabled. It begins once
       // the tone has played (accounting for any distractor lead-in).
       startCountdown();
+      // Difficulty: begin auto-replay (button-spam mimic) if the slider is set.
+      startAutoReplay();
     }, 250);
   }
 
@@ -5108,6 +5325,7 @@
     // ends the question, so stop on those; harmless to stop on wrong too since
     // the next question restarts it.)
     if (opt.isCorrect || opt.timedOut) stopCountdown();
+    if (opt.isCorrect || opt.timedOut) stopAutoReplay();
     if (gameMode === 'casual') {
       // CASUAL: every click counts toward the denominator.
       // 4 wrong tries before getting it right => 1 / 4.
@@ -5190,6 +5408,10 @@
           const unlocked = tryUnlockStreak();
           if (unlocked) {
             renderAccountBar();
+            buildNoteChips();
+            updateNoteUnlockPill();
+            refreshDiffVisibility();
+            updateDiffUnlockPill();
             setTimeout(function(){ showUnlockPopup(unlocked); }, 700);
           }
         }
@@ -5391,6 +5613,7 @@
       document.getElementById('results').classList.remove('active');
       hideCasualTimer();
       hideCountdown();
+      stopAutoReplay();
       updateScore();
       renderChallengeBanner();
       updateQuizBtnLabel();
@@ -5435,6 +5658,7 @@
     resetSessionWeak();
     hideCasualTimer();
     hideCountdown();
+    stopAutoReplay();
     document.getElementById('results').classList.remove('active');
     startQuiz();
   });
@@ -5490,6 +5714,7 @@
     document.getElementById('quiz').classList.remove('active');
     hideCasualTimer();
     hideCountdown();
+    stopAutoReplay();
     currentQuiz = null;
     competitionState = null;
   });
@@ -6226,6 +6451,26 @@
     if (r && !r.disabled) r.click();
   }
 
+  // ----- Auto-replay: repeats the current tone on a timer, exactly as if the
+  // player were spamming the Replay button. Each tick plays a FRESH tone (with
+  // its attack), identical to a manual press: playTone(note, oct, 1.3, timbre).
+  // Driven by difficulty.autoReplayMs (0 = off). Lives only while a quiz tone is
+  // active; started when the tone is presented, stopped on answer / quiz end. -----
+  let _autoReplayTimer = null;
+  function stopAutoReplay() {
+    if (_autoReplayTimer) { clearInterval(_autoReplayTimer); _autoReplayTimer = null; }
+  }
+  function startAutoReplay() {
+    stopAutoReplay();
+    if (!difficulty.autoReplayMs || difficulty.autoReplayMs <= 0) return;
+    if (difficulty.noReplay) return; // far-left "no replay" zone overrides
+    _autoReplayTimer = setInterval(function() {
+      // Only while a question is live and not yet locked/answered.
+      if (!currentQuiz || quizLocked) { stopAutoReplay(); return; }
+      playTone(currentQuiz.noteIdx, currentQuiz.octave, 1.3, currentQuiz.timbre);
+    }, difficulty.autoReplayMs);
+  }
+
   let _gpPrev = {};   // index → previous pressed-bool, per gamepad index
   let _gpLooping = false;
   let _gpBlocked = false; // set true if getGamepads is disallowed (e.g. sandboxed iframe)
@@ -6319,7 +6564,7 @@
     function refreshLabel(){
       if (volRandomActive) {
         const lo = Math.min(volMin, volMax), hi = Math.max(volMin, volMax);
-        tog.textContent = 'Volume: ' + lo + '–' + hi + '%';
+        tog.textContent = 'Volume';
         tog.setAttribute('aria-pressed', 'true');
         if (shell) shell.setAttribute('data-on', 'true');
       } else {
@@ -6370,6 +6615,10 @@
   renderAccountBar();
   updateQuizBtnLabel();
   buildNoteChips();
+  updateNoteUnlockPill();
+  refreshDiffVisibility();
+  updateDiffUnlockPill();
+  (function(){ var u = unlockedNoteSet(); selectedNotes = selectedNotes.filter(function(n){ return u.indexOf(n) !== -1; }); if (selectedNotes.length === 0) selectedNotes = [0]; })();
   buildOctaveChips();
   buildPlayGrid();
   refreshPreviewLock();
