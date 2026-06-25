@@ -169,7 +169,7 @@
      it would otherwise overflow next to the dog). Centered in the text column. */
   h1 .maker { white-space: nowrap; font-size: clamp(20px, 5.4vw, 40px); text-align: center; }
   /* "Ear Atelier" enlarged and centered. Allowed to wrap so it never clips. */
-  .title-line.title-centered { font-size: 66px; text-align: center; line-height: 1.0; }
+  .title-line.title-centered { font-size: 40px; text-align: center; line-height: 1.0; }
   /* The dramatic two-line subtitle, small font matching the crest. */
   .subtitle-centered {
     font-size: clamp(8px, 2.3vw, 12px);
@@ -1229,6 +1229,7 @@
     letter-spacing: 0.03em;
   }
   .mode-legend-row { display: block; }
+  .mode-legend-row[hidden] { display: none; }
   .mode-legend-name { color: var(--brass-bright); }
 
   /* Volume range row (sits under the Quiz mode toggle) */
@@ -1531,6 +1532,32 @@
   /* Hide unlock pill & banner in dev mode — silly when everything's unlocked. */
   body.dev-mode .unlock-pill,
   body.dev-mode #challenge-banner { display: none !important; }
+
+  /* Difficulty SUBCATEGORY controls in dev mode. These sit on the white panel,
+     so their dim brass/grey text is unreadable. Force readable BLACK text for
+     the labels/segments, and WHITE text only on the dark-filled ACTIVE segment. */
+  body.dev-mode .diff-seg,
+  body.dev-mode .diff-sub-label,
+  body.dev-mode .diff-slider-label,
+  body.dev-mode .diff-slider-val,
+  body.dev-mode .diff-warn,
+  body.dev-mode .diff-hint,
+  body.dev-mode .vol-label,
+  body.dev-mode .vol-unit,
+  body.dev-mode .vol-dash,
+  body.dev-mode .vol-mode-label,
+  body.dev-mode .vol-mode-opt,
+  body.dev-mode .vol-mode-opt span,
+  body.dev-mode .diff-sub input[type="number"] {
+    color: #000000 !important;
+    border-color: #000000 !important;
+    opacity: 1 !important;
+  }
+  body.dev-mode .diff-seg.active {
+    background: #000000 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+  }
 </style>
 </head>
 <body>
@@ -1621,7 +1648,7 @@
         <button data-game="sinn">SINN</button>
       </div>
       <div class="mode-legend">
-        <div class="mode-legend-row" data-game-desc="casual"><span class="mode-legend-name">Grind</span> ignores points, adapting to bias missed tones.</div>
+        <div class="mode-legend-row" data-game-desc="casual"><span class="mode-legend-name">Grind</span> ignores points, adapting to bias missed tones to help you improve.</div>
         <div class="mode-legend-row" data-game-desc="competition" hidden><span class="mode-legend-name">Competition</span> serves to track progress between ascensions, providing 100 chances to earn points.</div>
         <div class="mode-legend-row" data-game-desc="sinn" hidden><span class="mode-legend-name">SINN</span> determines if you are worthy of more complexity by adjusting timbre each tone, offering unlimited chances to earn points.</div>
       </div>
@@ -5045,15 +5072,20 @@
                     : 'Grind';
   }
 
+  // Show only the currently-selected game mode's description.
+  function refreshGameModeDescriptions() {
+    document.querySelectorAll('[data-game-desc]').forEach(function(d) {
+      d.hidden = (d.getAttribute('data-game-desc') !== gameMode);
+    });
+  }
+
   document.querySelectorAll('#game-mode-toggle button').forEach(function(b) {
     b.addEventListener('click', function() {
       document.querySelectorAll('#game-mode-toggle button').forEach(function(x) { x.classList.remove('active'); });
       b.classList.add('active');
       gameMode = b.getAttribute('data-game');
       // Show only the selected mode's description
-      document.querySelectorAll('[data-game-desc]').forEach(function(d) {
-        d.hidden = (d.getAttribute('data-game-desc') !== gameMode);
-      });
+      refreshGameModeDescriptions();
       // Reset any active session when switching modes
       score = { correct: 0, total: 0 };
       competitionState = null;
@@ -5117,7 +5149,9 @@
       const msg = document.getElementById('quiz-msg');
       if (msg && !quizLocked) {
         msg.className = 'quiz-msg wrong';
-        msg.textContent = (noReplayTries >= 100)
+        msg.textContent = (noReplayTries >= 1000)
+          ? 'nothing is going to happen if you keep doing this'
+          : (noReplayTries >= 100)
           ? "you're not persistent; you're goofy"
           : 'why do you think this would work?';
       }
@@ -6018,6 +6052,7 @@
   buildOctaveChips();
   buildPlayGrid();
   refreshPreviewLock();
+  refreshGameModeDescriptions();
   applyDevModeClass();
 })();
 </script>
