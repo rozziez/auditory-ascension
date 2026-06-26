@@ -163,9 +163,9 @@
     text-align: left;
     flex: 1 1 auto;
     min-width: 0;            /* allow the text column to shrink within the row */
-    /* The dog (191px) stays the focal point — never let the title stack tower
-       over him. Cap the text column near the dog's height and center it. */
-    max-height: 200px;
+    /* The dog (191px) stays the focal point, but the title may grow to about
+       the height of his ears / the tip of his neck. Cap near his full height. */
+    max-height: 190px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -175,18 +175,18 @@
      (shrinking on narrow screens, growing up to a desktop cap) instead of
      wrapping. The clamp maxes match the prior fixed sizes so desktop is
      unchanged; the dog stays the focal point via the .header-text max-height. */
-  h1 .maker { white-space: nowrap; font-size: clamp(18px, 6vw, 35px); text-align: center; }
+  h1 .maker { white-space: nowrap; font-size: clamp(18px, 6vw, 46px); text-align: center; }
   /* "Ear Atelier" — same single-line scale-to-fit behavior. */
-  .title-line.title-centered { white-space: nowrap; font-size: clamp(22px, 7.6vw, 44px); text-align: center; line-height: 1.0; }
+  .title-line.title-centered { white-space: nowrap; font-size: clamp(22px, 7.6vw, 58px); text-align: center; line-height: 1.0; }
   /* The dramatic two-line subtitle, small font matching the crest. */
   .subtitle-centered {
     white-space: nowrap;
-    font-size: clamp(5px, 1.4vw, 7px);
+    font-size: clamp(5px, 1.4vw, 9px);
     letter-spacing: 0.08em;
     line-height: 1.5;
   }
   /* "No. 13" crest sized to match the subtitle (smaller than before). */
-  .crest-stacked { white-space: nowrap; font-size: clamp(5px, 1.4vw, 7px); }
+  .crest-stacked { white-space: nowrap; font-size: clamp(5px, 1.4vw, 9px); }
   @media (max-width: 420px) {
     .header-row { gap: 12px; }
   }
@@ -300,6 +300,7 @@
     font-size: 13px;
     line-height: 1.15;
     padding: 8px 6px;
+    min-height: 48px;  /* match the taller colored layout so toggling colors doesn't shift the grid */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -342,6 +343,7 @@
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    padding-left: 12px; /* offset by the dot width so it centers over the note name, not the whole chip */
   }
 
   .quick-row {
@@ -697,6 +699,20 @@
     50% { transform: scale(1.06); }
   }
 
+  .quiz-msg-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin: 14px 0 0;
+  }
+  .quiz-msg-row .quiz-msg { margin: 0; }
+  .prev-note {
+    flex: 0 0 auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.04em;
+    color: var(--muted); white-space: nowrap;
+    text-align: right;
+  }
+  .prev-note .pn-label { color: var(--brass-deep); }
+  .prev-note .pn-detune { color: var(--brass); }
   .quiz-msg {
     margin: 14px 0 0;
     min-height: 22px;
@@ -839,13 +855,13 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 30px; padding: 0;
     background: transparent; cursor: pointer;
-    border: none; border-left: 1px solid rgba(201,136,42,0.30);
+    border: none; border-left: 1px solid rgba(201,136,42,0.22);
     color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 9px;
     transition: all 0.16s ease;
   }
   .diff-caret:hover { color: var(--paper-dim); background: rgba(201,136,42,0.08); }
   .diff-shell[data-on="true"] .diff-caret {
-    color: var(--bg); border-left-color: rgba(26,20,16,0.35);
+    color: var(--bg); border-left: 1px solid rgba(26,20,16,0.55);
     background: var(--brass);
   }
   .diff-bloom.open .diff-caret { transform: rotate(180deg); }
@@ -859,7 +875,7 @@
     background: var(--brass); color: var(--bg); justify-content: center; flex: 1 1 auto;
   }
   .diff-bloom.open > .diff-shell .diff-caret {
-    color: var(--bg); border-left-color: rgba(26,20,16,0.35);
+    color: var(--bg); border-left: 1px solid rgba(26,20,16,0.55);
     background: var(--brass);
   }
   /* One-line description that leads each bloom panel. */
@@ -1679,6 +1695,28 @@
     border-color: #000000 !important;
     color: #ffffff !important;
   }
+  /* Dev mode: difficulty pills/shells use BLACK outlines (not gold) to match
+     the rest of the dev UI, and the caret divider is visible in each state. */
+  body.dev-mode .diff-shell,
+  body.dev-mode .diff-pill {
+    border-color: #000000 !important;
+  }
+  body.dev-mode .diff-pill { color: #000000 !important; }
+  body.dev-mode .diff-caret {
+    border-left: 1px solid rgba(0,0,0,0.30) !important;
+    color: #000000 !important;
+  }
+  /* On the dark-filled ACTIVE / open header, the divider goes white and the
+     glyph goes white so it's visible against black. */
+  body.dev-mode .diff-shell[data-on="true"] .diff-pill,
+  body.dev-mode .diff-bloom.open > .diff-shell .diff-pill {
+    background: #000000 !important; color: #ffffff !important;
+  }
+  body.dev-mode .diff-shell[data-on="true"] .diff-caret,
+  body.dev-mode .diff-bloom.open > .diff-shell .diff-caret {
+    background: #000000 !important; color: #ffffff !important;
+    border-left: 1px solid rgba(255,255,255,0.45) !important;
+  }
 </style>
 </head>
 <body>
@@ -1689,7 +1727,7 @@
       <div class="header-text">
         <div class="crest crest-stacked">No. 13</div>
         <h1><span class="maker">Xerxes <em>&amp;</em> Rozanski's</span><span class="title-line title-centered">Ear Atelier</span></h1>
-        <p class="subtitle subtitle-centered">Listen. Guess. Suffer. Repeat.<br>Listen. Distinguish. Indulge. Repeat.</p>
+        <p class="subtitle subtitle-centered">Listen. Guess. Suffer. Repeat.<br>Listen. Differentiate. Indulge. Repeat.</p>
       </div>
     </div>
   </header>
@@ -1715,21 +1753,20 @@
 
   <div class="panel">
 
-    <div class="field">
-      <div class="field-label field-label-row">Timbres in the pool<button class="unlock-pill push-right" id="unlock-pill" aria-expanded="false"></button></div>
+    <div class="field" id="timbre-field">
+      <div class="field-label field-label-row">Timbres in play<button class="unlock-pill push-right" id="unlock-pill" aria-expanded="false"></button></div>
       <div class="challenge-banner" id="challenge-banner" hidden></div>
       <div class="timbre-sections" id="timbre-grid"></div>
     </div>
 
-    <div class="field">
-      <div class="field-label field-label-row">Notes in the pool
+    <div class="field" id="note-field">
+      <div class="field-label field-label-row">Notes in play
         <button class="legend-toggle" id="legend-toggle" aria-expanded="false">
           <span class="legend-chev-static">▾</span> Colors <span class="legend-chev">▾</span>
         </button>
         <span class="unlock-pill note-unlock-pill push-right" id="note-unlock-pill"></span>
       </div>
       <div class="chip-grid" id="note-chips"></div>
-      <div class="legend-grid" id="legend-grid" hidden></div>
       <div class="quick-row">
         <button data-notes="all">All 12</button>
         <span class="sep">◆</span>
@@ -1742,7 +1779,7 @@
     </div>
 
     <div class="field" id="octave-field">
-      <div class="field-label">Octaves in the pool</div>
+      <div class="field-label">Octaves in play</div>
       <div class="chip-grid" id="octave-chips"></div>
       <div class="quick-row">
         <button data-oct="middle">Middle (3-5)</button>
@@ -1754,25 +1791,68 @@
     </div>
 
     <div class="field">
-      <div class="field-label">Quiz mode</div>
-      <div class="mode-toggle" id="mode-toggle">
-        <button data-mode="octave" class="active">Octave</button>
-        <button data-mode="note">Note</button>
-        <button data-mode="both">Note + Octave</button>
+      <div class="field-label">What to differentiate</div>
+      <div class="diff-grid" id="mode-toggle">
+        <div class="diff-bloom" id="quiz-octave-bloom">
+          <div class="diff-shell" data-on="true">
+            <button class="diff-pill game-pill active" data-mode="octave">Octave</button>
+            <button class="diff-caret" id="quiz-octave-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="quiz-octave-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">Octave</span> — name which octave the tone belongs to, ignoring which note it is.</p>
+          </div>
+        </div>
+        <div class="diff-bloom" id="quiz-note-bloom">
+          <div class="diff-shell" data-on="false">
+            <button class="diff-pill game-pill" data-mode="note">Note</button>
+            <button class="diff-caret" id="quiz-note-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="quiz-note-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">Note</span> — name the note (its letter), no matter which octave it's played in.</p>
+          </div>
+        </div>
+        <div class="diff-bloom" id="quiz-both-bloom">
+          <div class="diff-shell" data-on="false">
+            <button class="diff-pill game-pill" data-mode="both">Note + Octave</button>
+            <button class="diff-caret" id="quiz-both-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="quiz-both-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">Note + Octave</span> — pinpoint both the note and the octave it sounds in. The full challenge.</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="field">
-      <div class="field-label">Game mode</div>
-      <div class="mode-toggle" id="game-mode-toggle">
-        <button data-game="casual" class="active">Grind</button>
-        <button data-game="competition">Competition</button>
-        <button data-game="sinn">SINN</button>
-      </div>
-      <div class="mode-legend">
-        <div class="mode-legend-row" data-game-desc="casual"><span class="mode-legend-name">Grind</span> ignores points, adapting to bias missed tones to help you improve.</div>
-        <div class="mode-legend-row" data-game-desc="competition" hidden><span class="mode-legend-name">Competition</span> serves to track progress between ascensions, providing 100 chances to earn points.</div>
-        <div class="mode-legend-row" data-game-desc="sinn" hidden><span class="mode-legend-name">SINN</span> determines if you are worthy of more complexity by adjusting timbre each tone, offering unlimited chances to earn points.</div>
+      <div class="field-label">How to differentiate</div>
+      <div class="diff-grid" id="game-mode-toggle">
+        <div class="diff-bloom" id="game-casual-bloom">
+          <div class="diff-shell" data-on="true">
+            <button class="diff-pill game-pill active" data-game="casual">Grind</button>
+            <button class="diff-caret" id="game-casual-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="game-casual-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">Grind</span> ignores points, adapting to bias missed tones to help you improve.</p>
+          </div>
+        </div>
+        <div class="diff-bloom" id="game-competition-bloom">
+          <div class="diff-shell" data-on="false">
+            <button class="diff-pill game-pill" data-game="competition">Competition</button>
+            <button class="diff-caret" id="game-competition-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="game-competition-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">Competition</span> serves to track progress between ascensions, providing 100 chances to earn points.</p>
+          </div>
+        </div>
+        <div class="diff-bloom" id="game-sinn-bloom">
+          <div class="diff-shell" data-on="false">
+            <button class="diff-pill game-pill" data-game="sinn">SINN</button>
+            <button class="diff-caret" id="game-sinn-caret" aria-label="Show details" type="button">▾</button>
+          </div>
+          <div class="diff-reveal" id="game-sinn-sub" hidden>
+            <p class="diff-desc"><span class="mode-legend-name">SINN</span> determines if you are worthy of more complexity by adjusting timbre each tone, offering unlimited chances to earn points.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2007,7 +2087,10 @@
     </div>
     <div class="guess-grid" id="guess-grid"></div>
     <div class="countdown-track" id="countdown-track" hidden><div class="countdown-fill" id="countdown-fill"></div></div>
-    <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
+    <div class="quiz-msg-row">
+      <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
+      <span class="prev-note" id="prev-note"></span>
+    </div>
   </div>
 
   <div class="results" id="results">
@@ -2181,6 +2264,30 @@
   let gameMode = 'casual'; // 'casual' or 'competition'
   let currentQuiz = null;
   let lastDetuneHz = null;   // signed Hz the last tone was detuned, for the answer reveal
+  let prevNoteInfo = null;   // {noteIdx, octave, hz, detuneHz} of the just-finished tone, for the prev-note readout
+  // Render the "previous note" readout to the right of the quiz message.
+  function renderPrevNote() {
+    const el = document.getElementById('prev-note');
+    if (!el) return;
+    if (!prevNoteInfo) { el.innerHTML = ''; return; }
+    const name = NOTE_NAMES[prevNoteInfo.noteIdx] + prevNoteInfo.octave;
+    let html = '<span class="pn-label">prev</span> ' + name + ' · ' + prevNoteInfo.hz.toFixed(1) + ' Hz';
+    if (prevNoteInfo.detuneHz != null) {
+      const sign = prevNoteInfo.detuneHz >= 0 ? '+' : '−';
+      html += ' <span class="pn-detune">' + sign + Math.abs(prevNoteInfo.detuneHz).toFixed(1) + ' Hz</span>';
+    }
+    el.innerHTML = html;
+  }
+  // Capture the current quiz tone as the "previous" note (called when a question resolves).
+  function capturePrevNote() {
+    if (!currentQuiz) return;
+    prevNoteInfo = {
+      noteIdx: currentQuiz.noteIdx,
+      octave: currentQuiz.octave,
+      hz: freq(currentQuiz.noteIdx, currentQuiz.octave),
+      detuneHz: (difficulty.detune ? lastDetuneHz : null)
+    };
+  }
   let noReplayTries = 0;     // consecutive replay attempts on the current note (No-replay modifier)
   let score = { correct: 0, total: 0 };
   let competitionState = null; // {points, correctCount, totalGuesses, startTime, questionStartTime}
@@ -2517,7 +2624,23 @@
     if (store.currentId === id) store.currentId = store.profiles[0] ? store.profiles[0].id : null;
     saveStore();
   }
-  function switchProfile(id) { store.currentId = id; saveStore(); renderAccountBar(); applyDevModeClass(); if (typeof buildNoteChips==='function') buildNoteChips(); if (typeof updateNoteUnlockPill==='function') updateNoteUnlockPill(); if (typeof refreshDiffVisibility==='function') refreshDiffVisibility(); if (typeof updateDiffUnlockPill==='function') updateDiffUnlockPill(); }
+  // Rebuild every unlock-gated pool + counter after a profile change so the UI
+  // never shows stale lock state until the next click.
+  function refreshAllPools() {
+    if (typeof buildNoteChips === 'function') buildNoteChips();
+    if (typeof updateNoteUnlockPill === 'function') updateNoteUnlockPill();
+    if (typeof refreshTimbreDropdown === 'function') refreshTimbreDropdown();
+    if (typeof refreshDiffVisibility === 'function') refreshDiffVisibility();
+    if (typeof updateDiffUnlockPill === 'function') updateDiffUnlockPill();
+    // Clamp selections to what the new profile actually has unlocked.
+    if (typeof unlockedNoteSet === 'function') {
+      var u = unlockedNoteSet();
+      selectedNotes = selectedNotes.filter(function(n){ return u.indexOf(n) !== -1; });
+      if (!selectedNotes.length) selectedNotes = [0];
+    }
+    if (typeof buildPlayGrid === 'function') buildPlayGrid();
+  }
+  function switchProfile(id) { store.currentId = id; saveStore(); renderAccountBar(); applyDevModeClass(); refreshAllPools(); }
 
   function comboLabel(game, quiz) {
     const g = game === 'sinn' ? 'SINN' : game === 'competition' ? 'Competition' : 'Grind';
@@ -2527,7 +2650,7 @@
 
   // Per-session weak-spot accumulator (first-guess correctness per note/octave)
   let sessionWeak = null; // { notes: {idx:{seen,miss}}, octs: {oct:{seen,miss}} }
-  function resetSessionWeak() { sessionWeak = { notes: {}, octs: {} }; }
+  function resetSessionWeak() { sessionWeak = { notes: {}, octs: {} }; prevNoteInfo = null; }
   function recordFirstGuess(noteIdx, octave, correct) {
     if (!sessionWeak) return;
     const n = sessionWeak.notes[noteIdx] || (sessionWeak.notes[noteIdx] = { seen:0, miss:0 });
@@ -4516,7 +4639,7 @@
         // Original plain layout (base form).
         chip.className = 'chip note-chip' + (sel ? ' active' : '');
         if (name.indexOf('♯') !== -1) {
-          chip.innerHTML = '<span class="enh">' + name + '</span><span class="enh">' + FLAT_MAP[name] + '</span>';
+          chip.innerHTML = '<span class="enh-inline">' + name + '/' + FLAT_MAP[name] + '</span>';
         } else {
           chip.textContent = name;
         }
@@ -4561,22 +4684,45 @@
 
   // SINN fixes the octave pool (its whole point is escalating timbre, not scope),
   // so grey out the octave field and block interaction while SINN is selected.
-  function applyOctaveLock() {
-    const field = document.getElementById('octave-field');
+  // Generic field lock: dim + disable interaction, with an italic note.
+  function setFieldLock(fieldId, locked, message) {
+    const field = document.getElementById(fieldId);
     if (!field) return;
-    const locked = (gameMode === 'sinn');
     field.style.opacity = locked ? '0.4' : '';
     field.style.pointerEvents = locked ? 'none' : '';
-    let note = document.getElementById('octave-lock-note');
+    const noteId = fieldId + '-lock-note';
+    let note = document.getElementById(noteId);
     if (locked && !note) {
       note = document.createElement('div');
-      note.id = 'octave-lock-note';
+      note.id = noteId;
       note.style.cssText = 'font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;';
-      note.textContent = 'SINN locks the octave pool.';
+      note.textContent = message;
       field.appendChild(note);
     } else if (!locked && note) {
       note.remove();
     }
+  }
+
+  // SINN philosophy: when the mode is on, every UNLOCKED note, octave, and
+  // timbre is activated into the pool, then all four pool fields are locked so
+  // the run can't be re-tuned mid-stream. Leaving SINN restores interaction.
+  function applyOctaveLock() {
+    const sinn = (gameMode === 'sinn');
+    if (sinn) {
+      // Activate everything unlocked.
+      selectedNotes = unlockedNoteSet().slice();
+      selectedOctaves = ALL_OCTAVES.slice();
+      selectedTimbres = unlockedTimbres().slice();
+      if (!selectedTimbres.length) selectedTimbres = ['sine'];
+      buildNoteChips();
+      buildOctaveChips();
+      refreshTimbreDropdown();
+      buildPlayGrid();
+    }
+    setFieldLock('note-field', sinn, 'SINN uses every unlocked note.');
+    setFieldLock('octave-field', sinn, 'SINN uses every octave.');
+    setFieldLock('timbre-field', sinn, 'SINN uses every unlocked timbre.');
+    setFieldLock('difficulty-field', sinn, 'SINN locks your modifiers for the run.');
   }
 
   function buildPlayGrid() {
@@ -4659,12 +4805,30 @@
   });
 
   // Mode toggle
-  document.querySelectorAll('#mode-toggle button').forEach(function(b) {
+  document.querySelectorAll('#mode-toggle .game-pill').forEach(function(b) {
     b.addEventListener('click', function() {
-      document.querySelectorAll('#mode-toggle button').forEach(function(x) { x.classList.remove('active'); });
+      document.querySelectorAll('#mode-toggle .game-pill').forEach(function(x) {
+        x.classList.remove('active');
+        var sh = x.closest('.diff-shell'); if (sh) sh.setAttribute('data-on', 'false');
+      });
       b.classList.add('active');
+      var shell = b.closest('.diff-shell'); if (shell) shell.setAttribute('data-on', 'true');
       quizMode = b.getAttribute('data-mode');
       if (currentQuiz) startQuiz();
+    });
+  });
+  // Carets open each quiz-mode description (independent of selection).
+  [['quiz-octave-caret','quiz-octave-bloom','quiz-octave-sub'],
+   ['quiz-note-caret','quiz-note-bloom','quiz-note-sub'],
+   ['quiz-both-caret','quiz-both-bloom','quiz-both-sub']].forEach(function(t){
+    var caret = document.getElementById(t[0]);
+    var bloom = document.getElementById(t[1]);
+    var sub = document.getElementById(t[2]);
+    if (!caret || !bloom) return;
+    caret.addEventListener('click', function(){
+      var open = bloom.classList.toggle('open');
+      if (sub) sub.hidden = !open;
+      caret.textContent = open ? '▴' : '▾';
     });
   });
 
@@ -4891,6 +5055,9 @@
   }
 
   function startQuiz() {
+    // Before choosing the next tone, record the one just finished as the
+    // "previous note" readout (skipped on the very first tone of a session).
+    capturePrevNote();
     if (selectedNotes.length === 0 || selectedOctaves.length === 0) {
       const quiz = document.getElementById('quiz');
       quiz.classList.add('active');
@@ -5000,6 +5167,7 @@
     const msg = document.getElementById('quiz-msg');
     msg.className = 'quiz-msg';
     msg.textContent = 'Listen carefully…';
+    renderPrevNote();
     updateScore();
     updateQuizTitle();
 
@@ -5593,18 +5761,20 @@
 
   // Show only the currently-selected game mode's description.
   function refreshGameModeDescriptions() {
-    document.querySelectorAll('[data-game-desc]').forEach(function(d) {
-      d.hidden = (d.getAttribute('data-game-desc') !== gameMode);
-    });
+    // Descriptions now live inside each mode's bloom panel; nothing to toggle here.
   }
 
-  document.querySelectorAll('#game-mode-toggle button').forEach(function(b) {
+  // Game-mode bodies are a single-select (radio): selecting one lights its shell
+  // brass and clears the others. The caret opens that mode's description panel.
+  document.querySelectorAll('#game-mode-toggle .game-pill').forEach(function(b) {
     b.addEventListener('click', function() {
-      document.querySelectorAll('#game-mode-toggle button').forEach(function(x) { x.classList.remove('active'); });
+      document.querySelectorAll('#game-mode-toggle .game-pill').forEach(function(x) {
+        x.classList.remove('active');
+        var sh = x.closest('.diff-shell'); if (sh) sh.setAttribute('data-on', 'false');
+      });
       b.classList.add('active');
+      var shell = b.closest('.diff-shell'); if (shell) shell.setAttribute('data-on', 'true');
       gameMode = b.getAttribute('data-game');
-      // Show only the selected mode's description
-      refreshGameModeDescriptions();
       // Reset any active session when switching modes
       score = { correct: 0, total: 0 };
       competitionState = null;
@@ -5619,6 +5789,20 @@
       updateQuizBtnLabel();
       refreshPreviewLock();
       applyOctaveLock();
+    });
+  });
+  // Carets open each game-mode description (independent of selection).
+  [['game-casual-caret','game-casual-bloom','game-casual-sub'],
+   ['game-competition-caret','game-competition-bloom','game-competition-sub'],
+   ['game-sinn-caret','game-sinn-bloom','game-sinn-sub']].forEach(function(t){
+    var caret = document.getElementById(t[0]);
+    var bloom = document.getElementById(t[1]);
+    var sub = document.getElementById(t[2]);
+    if (!caret || !bloom) return;
+    caret.addEventListener('click', function(){
+      var open = bloom.classList.toggle('open');
+      if (sub) sub.hidden = !open;
+      caret.textContent = open ? '▴' : '▾';
     });
   });
 
@@ -5817,7 +6001,7 @@
         const id = btn.getAttribute('data-del');
         const p = store.profiles.find(function(x){ return x.id===id; });
         if (p && confirm('Delete profile “' + p.name + '” and all its history?')) {
-          deleteProfile(id); renderModal(); renderAccountBar(); applyDevModeClass();
+          deleteProfile(id); renderModal(); renderAccountBar(); applyDevModeClass(); refreshAllPools();
         }
       });
     });
@@ -5830,7 +6014,7 @@
       if (store.profiles.some(function(p){ return p.name.toLowerCase() === v.toLowerCase(); })) {
         err.textContent = 'A profile with that name already exists.'; return;
       }
-      createProfile(v); renderAccountBar(); renderModal(); applyDevModeClass();
+      createProfile(v); renderAccountBar(); renderModal(); applyDevModeClass(); refreshAllPools();
     }
     createBtn.addEventListener('click', doCreate);
     nameInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') doCreate(); });
@@ -6541,13 +6725,10 @@
     }
   }
   document.getElementById('legend-toggle').addEventListener('click', function(){
-    const grid = document.getElementById('legend-grid');
-    const open = !grid.hidden;
-    if (open) { grid.hidden = true; this.setAttribute('aria-expanded', 'false'); }
-    else { buildLegend(); grid.hidden = false; this.setAttribute('aria-expanded', 'true'); }
-    // Also flip the note chips between the plain base form and the colored layout,
-    // tracking the dropdown's open state.
-    colorMode = !open;
+    // Toggle the colored note-chip layout. (The standalone color chart was
+    // removed — the colors now live directly on the note pills.)
+    colorMode = !colorMode;
+    this.setAttribute('aria-expanded', String(colorMode));
     buildNoteChips();
   });
 
