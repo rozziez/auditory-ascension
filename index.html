@@ -369,7 +369,7 @@
     transition: color 0.1s;
   }
   .quick-row button:hover { color: var(--brass-bright); }
-  .quick-row .sep { color: var(--brass-deep); font-size: 8px; vertical-align: middle; }
+  .quick-row .sep { color: var(--brass-deep); font-size: 10px; vertical-align: middle; }
 
   .play-grid {
     display: grid;
@@ -856,7 +856,7 @@
     width: 30px; padding: 0;
     background: transparent; cursor: pointer;
     border: none; border-left: 1px solid rgba(201,136,42,0.22);
-    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px;
     transition: all 0.16s ease;
   }
   .diff-caret:hover { color: var(--paper-dim); background: rgba(201,136,42,0.08); }
@@ -865,18 +865,28 @@
     background: var(--brass);
   }
   .diff-bloom.open .diff-caret { transform: rotate(180deg); }
-  /* When open, the shell squares its bottom to merge with the reveal panel. */
+  /* When open, the shell spans full width on its own row. The body keeps its
+     natural (label) width so the divider stays where it was when collapsed; the
+     caret grows to the right margin and fills brass. You can click the caret in
+     the same spot to collapse. */
   .diff-bloom.open > .diff-shell {
-    align-self: stretch; border-radius: 3px 3px 0 0;
+    width: 100%;
+    border-radius: 3px 3px 0 0;
     border-color: var(--brass);
     box-shadow: 0 0 12px -3px rgba(201,136,42,0.55);
   }
   .diff-bloom.open > .diff-shell .diff-pill {
-    background: var(--brass); color: var(--bg); justify-content: center; flex: 1 1 auto;
+    background: var(--brass); color: var(--bg);
+    flex: 0 1 auto;
+    border-right: 1px solid rgba(26,20,16,0.55);
   }
   .diff-bloom.open > .diff-shell .diff-caret {
-    color: var(--bg); border-left: 1px solid rgba(26,20,16,0.55);
+    color: var(--bg); border-left: none;
     background: var(--brass);
+    flex: 1 1 auto;            /* fill the rest of the row to the right margin */
+    justify-content: flex-start;
+    padding-left: 9px;        /* keep the glyph near the divider, not centered far right */
+    width: auto;
   }
   /* One-line description that leads each bloom panel. */
   .diff-desc {
@@ -1712,10 +1722,18 @@
   body.dev-mode .diff-bloom.open > .diff-shell .diff-pill {
     background: #000000 !important; color: #ffffff !important;
   }
-  body.dev-mode .diff-shell[data-on="true"] .diff-caret,
-  body.dev-mode .diff-bloom.open > .diff-shell .diff-caret {
+  /* Collapsed-selected: white divider on the caret's left border. */
+  body.dev-mode .diff-shell[data-on="true"] .diff-caret {
     background: #000000 !important; color: #ffffff !important;
     border-left: 1px solid rgba(255,255,255,0.45) !important;
+  }
+  /* Expanded: the divider lives on the pill's right border — make it white. */
+  body.dev-mode .diff-bloom.open > .diff-shell .diff-pill {
+    border-right: 1px solid rgba(255,255,255,0.45) !important;
+  }
+  body.dev-mode .diff-bloom.open > .diff-shell .diff-caret {
+    background: #000000 !important; color: #ffffff !important;
+    border-left: none !important;
   }
 </style>
 </head>
