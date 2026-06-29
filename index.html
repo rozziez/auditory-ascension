@@ -553,17 +553,24 @@
   .replay-btn:active { transform: scale(0.97); }
 
   .stop-quiz {
-    background: none;
-    border: none;
-    color: var(--muted);
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid rgba(201, 136, 42, 0.45);
+    border-radius: 3px;
+    color: var(--brass);
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     cursor: pointer;
     margin-left: auto;
+    transition: all 0.12s;
   }
-  .stop-quiz:hover { color: var(--paper); }
+  .stop-quiz:hover {
+    color: var(--brass-bright);
+    border-color: var(--brass-bright);
+  }
+  .stop-quiz:active { transform: scale(0.97); }
 
   /* ============ Casual-mode visual timer ============ */
   .casual-timer {
@@ -700,16 +707,20 @@
   }
 
   .quiz-msg-row {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: flex-end; justify-content: space-between;
     gap: 12px; margin: 14px 0 0;
   }
+  .quiz-msg-stack {
+    display: flex; flex-direction: column; gap: 4px;
+    min-width: 0; flex: 1 1 auto;
+  }
   .quiz-msg-row .quiz-msg { margin: 0; }
+  .quiz-msg-row .stop-quiz { flex: 0 0 auto; white-space: nowrap; }
   .prev-note {
-    flex: 0 0 auto;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px; letter-spacing: 0.04em;
     color: var(--muted); white-space: nowrap;
-    text-align: right;
+    text-align: left;
   }
   .prev-note .pn-label { color: var(--brass-deep); }
   .prev-note .pn-detune { color: var(--brass); }
@@ -2088,7 +2099,6 @@
   <div class="quiz" id="quiz">
     <div class="quiz-header">
       <span class="quiz-title" id="quiz-title">— In Session —</span>
-      <button class="stop-quiz" id="stop-quiz">End session</button>
     </div>
     <div class="quiz-controls">
       <button class="replay-btn" id="replay">↻ Replay</button>
@@ -2106,8 +2116,11 @@
     <div class="guess-grid" id="guess-grid"></div>
     <div class="countdown-track" id="countdown-track" hidden><div class="countdown-fill" id="countdown-fill"></div></div>
     <div class="quiz-msg-row">
-      <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
-      <span class="prev-note" id="prev-note"></span>
+      <div class="quiz-msg-stack">
+        <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
+        <span class="prev-note" id="prev-note"></span>
+      </div>
+      <button class="stop-quiz" id="stop-quiz">End session</button>
     </div>
   </div>
 
@@ -2282,17 +2295,22 @@
   let gameMode = 'casual'; // 'casual' or 'competition'
   let currentQuiz = null;
   let lastDetuneHz = null;   // signed Hz the last tone was detuned, for the answer reveal
-  let prevNoteInfo = null;   // {noteIdx, octave, hz, detuneHz} of the just-finished tone, for the prev-note readout
+  let prevNoteInfo = null;   // {noteIdx, octave, hz, detuneHz, timbre} of the just-finished tone, for the prev-note readout
   // Render the "previous note" readout to the right of the quiz message.
   function renderPrevNote() {
     const el = document.getElementById('prev-note');
     if (!el) return;
     if (!prevNoteInfo) { el.innerHTML = ''; return; }
     const name = NOTE_NAMES[prevNoteInfo.noteIdx] + prevNoteInfo.octave;
-    let html = '<span class="pn-label">prev</span> ' + name + ' · ' + prevNoteInfo.hz.toFixed(1) + ' Hz';
+    let html = '<span class="pn-label">prev</span> — ' + name +
+               ' (' + prevNoteInfo.hz.toFixed(1) + ' Hz';
     if (prevNoteInfo.detuneHz != null) {
       const sign = prevNoteInfo.detuneHz >= 0 ? '+' : '−';
       html += ' <span class="pn-detune">' + sign + Math.abs(prevNoteInfo.detuneHz).toFixed(1) + ' Hz</span>';
+    }
+    html += ')';
+    if (prevNoteInfo.timbre) {
+      html += ' · ' + TIMBRE_LABELS[prevNoteInfo.timbre];
     }
     el.innerHTML = html;
   }
@@ -2303,7 +2321,8 @@
       noteIdx: currentQuiz.noteIdx,
       octave: currentQuiz.octave,
       hz: freq(currentQuiz.noteIdx, currentQuiz.octave),
-      detuneHz: (difficulty.detune ? lastDetuneHz : null)
+      detuneHz: (difficulty.detune ? lastDetuneHz : null),
+      timbre: (gameMode === 'sinn' && currentQuiz.timbre) ? currentQuiz.timbre : null
     };
   }
   let noReplayTries = 0;     // consecutive replay attempts on the current note (No-replay modifier)
@@ -5580,7 +5599,7 @@
       const msg = document.getElementById('quiz-msg');
       msg.className = 'quiz-msg correct';
       const timbreReveal = (gameMode === 'sinn' && currentQuiz.timbre)
-        ? ' · played on ' + TIMBRE_LABELS[currentQuiz.timbre]
+        ? ' · ' + TIMBRE_LABELS[currentQuiz.timbre]
         : '';
       msg.textContent = '✓ Correct — ' + NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave +
                         ' (' + freq(currentQuiz.noteIdx, currentQuiz.octave).toFixed(1) + ' Hz)' +
