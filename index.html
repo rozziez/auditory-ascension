@@ -2114,8 +2114,6 @@
     <div class="quiz-header">
       <button class="replay-btn" id="replay">↻ Replay</button>
       <span class="quiz-title" id="quiz-title">— In Session —</span>
-    </div>
-    <div class="quiz-controls">
       <span class="casual-timer" id="casual-timer">
         <span class="timer-dot"></span>
         <span class="timer-val" id="casual-timer-val">0:00</span>
@@ -5342,7 +5340,7 @@
     } else if (gameMode === 'competition' && competitionState) {
       t.textContent = '— Competition · 100 to clear —';
     } else {
-      t.textContent = '— In Session · Casual —';
+      t.textContent = '— Grind —';
     }
   }
 
