@@ -501,10 +501,10 @@
 
   .quiz-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 14px;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
   }
   .quiz-title {
@@ -522,21 +522,27 @@
   }
   .score .num { color: var(--brass-bright); font-weight: 500; }
 
-  /* In the controls row the score sits at the far right, beside the timer */
-  .quiz-controls .score {
-    margin-left: auto;
+  /* The score now lives in the result row's right column, above End session */
+  .quiz-msg-right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .quiz-msg-right .score {
     display: flex;
     align-items: center;
   }
-  .quiz-controls .score-line { align-items: flex-end; }
+  .quiz-msg-right .score-line { align-items: flex-end; }
 
   .quiz-controls {
     display: flex;
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 14px;
   }
+  .quiz-controls:empty { display: none; }
   .replay-btn {
     padding: 10px 16px;
     background: var(--burgundy);
@@ -706,6 +712,12 @@
     50% { transform: scale(1.06); }
   }
 
+  .quiz-msg-line {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin: 14px 0 0;
+  }
+  .quiz-msg-line .quiz-msg { margin: 0; flex: 1 1 auto; min-width: 0; }
+  .quiz-msg-line .score { flex: 0 0 auto; }
   .quiz-msg-row {
     display: flex; align-items: flex-end; justify-content: space-between;
     gap: 12px; margin: 14px 0 0;
@@ -735,6 +747,7 @@
   }
   .quiz-msg.correct { color: var(--correct); }
   .quiz-msg.wrong { color: var(--wrong); }
+  .quiz-msg.runover { color: var(--brass-bright); }
 
   .mode-toggle {
     display: flex;
@@ -2099,14 +2112,19 @@
 
   <div class="quiz" id="quiz">
     <div class="quiz-header">
+      <button class="replay-btn" id="replay">↻ Replay</button>
       <span class="quiz-title" id="quiz-title">— In Session —</span>
     </div>
     <div class="quiz-controls">
-      <button class="replay-btn" id="replay">↻ Replay</button>
       <span class="casual-timer" id="casual-timer">
         <span class="timer-dot"></span>
         <span class="timer-val" id="casual-timer-val">0:00</span>
       </span>
+    </div>
+    <div class="guess-grid" id="guess-grid"></div>
+    <div class="countdown-track" id="countdown-track" hidden><div class="countdown-fill" id="countdown-fill"></div></div>
+    <div class="quiz-msg-line">
+      <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
       <span class="score">
         <span class="score-line">
           <span><span class="num" id="score-num">0 / 0</span></span>
@@ -2114,14 +2132,13 @@
         </span>
       </span>
     </div>
-    <div class="guess-grid" id="guess-grid"></div>
-    <div class="countdown-track" id="countdown-track" hidden><div class="countdown-fill" id="countdown-fill"></div></div>
     <div class="quiz-msg-row">
       <div class="quiz-msg-stack">
-        <p class="quiz-msg" id="quiz-msg">Listen carefully…</p>
         <span class="prev-note" id="prev-note"></span>
       </div>
-      <button class="stop-quiz" id="stop-quiz">End session</button>
+      <div class="quiz-msg-right">
+        <button class="stop-quiz" id="stop-quiz">End session</button>
+      </div>
     </div>
   </div>
 
@@ -5320,10 +5337,10 @@
     const t = document.getElementById('quiz-title');
     if (gameMode === 'sinn' && competitionState) {
       const streak = competitionState.correctCount;
-      const tag = streak >= SINN_UNLOCK_STREAK ? ' · unlocked, keep going!' : ' · streak to ' + SINN_UNLOCK_STREAK;
-      t.textContent = '— SINN · ' + streak + ' streak' + tag + ' —';
+      const tag = streak >= SINN_UNLOCK_STREAK ? 'unlocked, keep going!' : 'streak to ' + SINN_UNLOCK_STREAK;
+      t.textContent = '— SINN · ' + tag + ' —';
     } else if (gameMode === 'competition' && competitionState) {
-      t.textContent = '— Competition · Note ' + (competitionState.correctCount + 1) + ' of ' + COMPETITION_TARGET + ' —';
+      t.textContent = '— Competition · 100 to clear —';
     } else {
       t.textContent = '— In Session · Casual —';
     }
@@ -5548,9 +5565,7 @@
         paintCorrect(b, currentQuiz.noteIdx, currentQuiz.octave);
         const msg = document.getElementById('quiz-msg');
         msg.className = 'quiz-msg correct';
-        msg.textContent = '✓ Correct — ' + NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave +
-                          ' (' + freq(currentQuiz.noteIdx, currentQuiz.octave).toFixed(1) + ' Hz)' +
-                          detuneSuffix();
+        msg.textContent = '✓ Correct';
         updateScore();
         setTimeout(startQuiz, 1400);
       } else {
@@ -5586,10 +5601,8 @@
         quizLocked = true;
         paintCorrect(b, currentQuiz.noteIdx, currentQuiz.octave);
         const msg2 = document.getElementById('quiz-msg');
-        msg2.className = 'quiz-msg correct';
-        msg2.textContent = '✓ That was ' + NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave +
-                           ' (' + freq(currentQuiz.noteIdx, currentQuiz.octave).toFixed(1) + ' Hz)' +
-                           detuneSuffix() + ' — run over.';
+        msg2.className = 'quiz-msg runover';
+        msg2.textContent = '✓ Correct — run over';
         setTimeout(endSinnRun, 1600);
         return;
       }
@@ -5604,12 +5617,7 @@
       paintCorrect(b, currentQuiz.noteIdx, currentQuiz.octave);
       const msg = document.getElementById('quiz-msg');
       msg.className = 'quiz-msg correct';
-      const timbreReveal = (gameMode === 'sinn' && currentQuiz.timbre)
-        ? '<br>on ' + escapeHtml(TIMBRE_LABELS[currentQuiz.timbre])
-        : '';
-      msg.innerHTML = '✓ Correct — ' + escapeHtml(NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave) +
-                        ' (' + freq(currentQuiz.noteIdx, currentQuiz.octave).toFixed(1) + ' Hz)' +
-                        escapeHtml(detuneSuffix()) + timbreReveal;
+      msg.textContent = '✓ Correct';
       updateScore();
 
       if (gameMode === 'sinn') {
@@ -5647,7 +5655,7 @@
       if (gameMode === 'sinn') {
         competitionState.sinnEnding = true;
         msg.className = 'quiz-msg wrong';
-        msg.textContent = '✗ Streak broken — find the right tone to reinforce it.';
+        msg.textContent = '✗ Incorrect — find the right tone';
         return;
       }
 
