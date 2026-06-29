@@ -723,6 +723,7 @@
     text-align: left;
   }
   .prev-note .pn-label { color: var(--brass-deep); }
+  .prev-note .pn-col { display: inline-block; vertical-align: top; }
   .prev-note .pn-detune { color: var(--brass); }
   .quiz-msg {
     margin: 14px 0 0;
@@ -2302,17 +2303,22 @@
     if (!el) return;
     if (!prevNoteInfo) { el.innerHTML = ''; return; }
     const name = NOTE_NAMES[prevNoteInfo.noteIdx] + prevNoteInfo.octave;
-    let html = '<span class="pn-label">prev</span> — ' + name +
-               ' (' + prevNoteInfo.hz.toFixed(1) + ' Hz';
+    // First line of the note column: "C3 (130.8 Hz[ +x Hz])".
+    let noteLine = name + ' (' + prevNoteInfo.hz.toFixed(1) + ' Hz';
     if (prevNoteInfo.detuneHz != null) {
       const sign = prevNoteInfo.detuneHz >= 0 ? '+' : '−';
-      html += ' <span class="pn-detune">' + sign + Math.abs(prevNoteInfo.detuneHz).toFixed(1) + ' Hz</span>';
+      noteLine += ' <span class="pn-detune">' + sign + Math.abs(prevNoteInfo.detuneHz).toFixed(1) + ' Hz</span>';
     }
-    html += ')';
+    noteLine += ')';
+    // The note column begins at the "C" (right after "prev — "). Putting the
+    // timbre on its own line *inside* this column makes it align under the C
+    // structurally — no character-width math, robust to the em-dash's width.
+    let noteCol = noteLine;
     if (prevNoteInfo.timbre) {
-      html += ' · ' + TIMBRE_LABELS[prevNoteInfo.timbre];
+      noteCol += '<br>' + TIMBRE_LABELS[prevNoteInfo.timbre];
     }
-    el.innerHTML = html;
+    el.innerHTML = '<span class="pn-label">prev</span> — ' +
+                   '<span class="pn-col">' + noteCol + '</span>';
   }
   // Capture the current quiz tone as the "previous" note (called when a question resolves).
   function capturePrevNote() {
@@ -5599,11 +5605,11 @@
       const msg = document.getElementById('quiz-msg');
       msg.className = 'quiz-msg correct';
       const timbreReveal = (gameMode === 'sinn' && currentQuiz.timbre)
-        ? ' · ' + TIMBRE_LABELS[currentQuiz.timbre]
+        ? '<br>on ' + escapeHtml(TIMBRE_LABELS[currentQuiz.timbre])
         : '';
-      msg.textContent = '✓ Correct — ' + NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave +
+      msg.innerHTML = '✓ Correct — ' + escapeHtml(NOTE_NAMES[currentQuiz.noteIdx] + currentQuiz.octave) +
                         ' (' + freq(currentQuiz.noteIdx, currentQuiz.octave).toFixed(1) + ' Hz)' +
-                        detuneSuffix() + timbreReveal;
+                        escapeHtml(detuneSuffix()) + timbreReveal;
       updateScore();
 
       if (gameMode === 'sinn') {
