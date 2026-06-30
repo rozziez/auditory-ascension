@@ -505,8 +505,11 @@
     align-items: center;
     margin-bottom: 14px;
     gap: 14px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
+  .quiz-header .casual-timer { order: 1; flex: 0 0 auto; }
+  .quiz-header .quiz-title { order: 2; flex: 1 1 auto; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .quiz-header .replay-btn { order: 3; flex: 0 0 auto; }
   .quiz-title {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -545,17 +548,18 @@
   .quiz-controls:empty { display: none; }
   .replay-btn {
     padding: 10px 16px;
-    background: var(--burgundy);
-    color: var(--paper);
-    border: none;
+    background: transparent;
+    color: var(--tyrian-bright);
+    border: 1px solid rgba(176, 53, 121, 0.6);
     border-radius: 3px;
-    font-family: 'EB Garamond', Garamond, serif;
-    font-size: 14px;
-    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.12s;
   }
-  .replay-btn:hover { background: #c54148; }
+  .replay-btn:hover { color: #d98bb4; border-color: #d98bb4; }
   .replay-btn:active { transform: scale(0.97); }
 
   .stop-quiz {
@@ -619,13 +623,8 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    max-height: 240px;
-    overflow-y: auto;
-    padding-right: 4px;
   }
-  .guess-grid::-webkit-scrollbar { width: 6px; }
-  .guess-grid::-webkit-scrollbar-thumb { background: var(--burgundy); border-radius: 3px; }
-  .guess-grid.picker-mode { display: block; max-height: none; overflow: visible; }
+  .guess-grid.picker-mode { display: block; }
 
   .guess-btn {
     padding: 11px 4px;
@@ -1880,11 +1879,11 @@
         </div>
         <div class="diff-bloom" id="game-competition-bloom">
           <div class="diff-shell" data-on="false">
-            <button class="diff-pill game-pill" data-game="competition">Competition</button>
+            <button class="diff-pill game-pill" data-game="competition">Compete</button>
             <button class="diff-caret" id="game-competition-caret" aria-label="Show details" type="button">▾</button>
           </div>
           <div class="diff-reveal" id="game-competition-sub" hidden>
-            <p class="diff-desc"><span class="mode-legend-name">Competition</span> serves to track progress between ascensions, providing 100 chances to earn points.</p>
+            <p class="diff-desc"><span class="mode-legend-name">Compete</span> serves to track progress between ascensions, providing 100 chances to earn points.</p>
           </div>
         </div>
         <div class="diff-bloom" id="game-sinn-bloom">
@@ -2102,7 +2101,7 @@
       <button class="action-btn" id="play-all"><span class="ic">▸▸</span>Play ascending</button>
     </div>
     <div class="preview-locked-note" id="preview-locked-note" hidden>
-      Preview is locked in Competition &amp; SINN.
+      Preview is locked in Compete &amp; SINN.
     </div>
     <div class="actions" style="margin-top:12px;">
       <button class="action-btn primary" id="quiz-btn"><span id="quiz-btn-label">Grind</span></button>
@@ -2141,7 +2140,7 @@
   </div>
 
   <div class="results" id="results">
-    <div class="results-crest" id="results-crest">— Competition Complete —</div>
+    <div class="results-crest" id="results-crest">— Compete Complete —</div>
     <h2 class="results-title">100 notes, identified.</h2>
     <div class="results-stats">
       <div class="stat">
@@ -2701,7 +2700,7 @@
   function switchProfile(id) { store.currentId = id; saveStore(); renderAccountBar(); applyDevModeClass(); refreshAllPools(); }
 
   function comboLabel(game, quiz) {
-    const g = game === 'sinn' ? 'SINN' : game === 'competition' ? 'Competition' : 'Grind';
+    const g = game === 'sinn' ? 'SINN' : game === 'competition' ? 'Compete' : 'Grind';
     const q = quiz === 'both' ? 'Note+Octave' : quiz === 'note' ? 'Note' : 'Octave';
     return g + ' · ' + q;
   }
@@ -5083,7 +5082,6 @@
   // Starts the session stopwatch. If it's already running (i.e. we've just
   // advanced to the next note), this is a no-op so the clock keeps counting.
   function startCasualTimer() {
-    if (gameMode !== 'casual') return;
     const wrap = document.getElementById('casual-timer');
     wrap.classList.add('show');
     wrap.classList.remove('paused');
@@ -5237,13 +5235,12 @@
         const eff = timbre || getTimbre();
         competitionState.timbresUsed[eff] = true;
       }
-      // Competition & SINN use a per-question clock; casual runs one
-      // session-long stopwatch that keeps counting across every note.
+      // Competition & SINN use a per-question clock for scoring; all modes now
+      // also run one session-long stopwatch that counts across every note.
       if ((gameMode === 'competition' || gameMode === 'sinn') && competitionState) {
         competitionState.questionStartTime = Date.now();
-      } else if (gameMode === 'casual') {
-        startCasualTimer();
       }
+      startCasualTimer();
       // Difficulty: start the answer countdown bar if enabled. It begins once
       // the tone has played (accounting for any distractor lead-in).
       startCountdown();
@@ -5335,10 +5332,9 @@
     const t = document.getElementById('quiz-title');
     if (gameMode === 'sinn' && competitionState) {
       const streak = competitionState.correctCount;
-      const tag = streak >= SINN_UNLOCK_STREAK ? 'unlocked, keep going!' : 'streak to ' + SINN_UNLOCK_STREAK;
-      t.textContent = '— SINN · ' + tag + ' —';
+      t.textContent = streak >= SINN_UNLOCK_STREAK ? '— SINN · unlocked, keep going! —' : '— SINN —';
     } else if (gameMode === 'competition' && competitionState) {
-      t.textContent = '— Competition · 100 to clear —';
+      t.textContent = '— Compete —';
     } else {
       t.textContent = '— Grind —';
     }
@@ -5745,7 +5741,7 @@
     document.getElementById('quiz').classList.remove('active');
     const results = document.getElementById('results');
     document.getElementById('results-crest').textContent =
-      (gameMode === 'sinn') ? '— SINN Complete —' : '— Competition Complete —';
+      (gameMode === 'sinn') ? '— SINN Complete —' : '— Compete Complete —';
     document.getElementById('result-points').textContent = competitionState.points;
     document.getElementById('result-time').textContent = timeStr;
     document.getElementById('result-timestamp').textContent = new Date().toLocaleString();
@@ -6162,7 +6158,7 @@
     });
 
     if (!runs.length) {
-      host.innerHTML = '<p class="empty-note">No ranked runs yet. Finish a Competition or SINN session to put a score on the board. (Casual accuracy shows under Progress.)</p>';
+      host.innerHTML = '<p class="empty-note">No ranked runs yet. Finish a Compete or SINN session to put a score on the board. (Casual accuracy shows under Progress.)</p>';
       return;
     }
 
@@ -6183,7 +6179,7 @@
       if (timbreOpts[t]) timbreSel += opt(t, TIMBRE_LABELS[t], lbFilter.timbre===t);
     });
     let gameSel = opt('any','Any mode', lbFilter.game==='any') +
-      opt('competition','Competition', lbFilter.game==='competition') +
+      opt('competition','Compete', lbFilter.game==='competition') +
       opt('sinn','SINN', lbFilter.game==='sinn');
     let octSel = opt('any','Any octaves', lbFilter.octs==='any');
     Object.keys(octOpts).sort().forEach(function(k){
@@ -6287,7 +6283,7 @@
     let html = sinnCard;
     if (scored.length) {
       html += '<div class="chart-card"><div class="chart-title">Score over time</div>' +
-        '<div class="chart-sub">Competition &amp; SINN points per session — higher is better</div>' +
+        '<div class="chart-sub">Compete &amp; SINN points per session — higher is better</div>' +
         lineChart(scored.map(function(s){ return s.score; }), 'pts') + '</div>';
     }
     if (casual.length) {
