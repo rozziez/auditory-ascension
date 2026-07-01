@@ -838,6 +838,35 @@
     display: flex; flex-wrap: wrap; align-items: flex-start;
     gap: 7px;
   }
+  /* 3-column variant: each item takes a third of the row. Inner shell/pill
+     stretch to fill the third so columns are even (not label-width). The
+     .open rule below still overrides any item to full width when bloomed. */
+  .diff-grid.cols3 > .diff-bloom,
+  .diff-grid.cols3 > .diff-shell,
+  .diff-grid.cols3 > .diff-pill {
+    flex: 0 0 calc((100% - 14px) / 3);
+    max-width: calc((100% - 14px) / 3);
+    min-width: 0;
+  }
+  .diff-grid.cols3 > .diff-bloom > .diff-shell,
+  .diff-grid.cols3 > .diff-bloom > .diff-pill {
+    width: 100%;
+  }
+  .diff-grid.cols3 .diff-pill {
+    padding-left: 8px; padding-right: 8px;
+    font-size: 11px; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; display: inline-flex;
+  }
+  .diff-grid.cols3 .diff-pill > span,
+  .diff-grid.cols3 .diff-shell .diff-pill {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  }
+  .diff-grid.cols3 .diff-caret { width: 24px; }
+  .diff-grid.cols3 .diff-shell .diff-pill { flex: 1 1 auto; text-align: center; }
+  /* Bloomed item still spans the full row to reveal its panel. */
+  .diff-grid.cols3 > .diff-bloom.open {
+    flex: 1 1 100%; max-width: 100%;
+  }
   /* Items that own sub-panels (volume, noise, distractor) get their own wrapper
      so they can grow to full width when bloomed without disturbing the cloud. */
   .diff-bloom { display: flex; flex-direction: column; flex: 0 0 auto; }
@@ -1834,7 +1863,7 @@
 
     <div class="field">
       <div class="field-label">What to differentiate</div>
-      <div class="diff-grid" id="mode-toggle">
+      <div class="diff-grid cols3" id="mode-toggle">
         <div class="diff-bloom" id="quiz-octave-bloom">
           <div class="diff-shell" data-on="true">
             <button class="diff-pill game-pill active" data-mode="octave">Octave</button>
@@ -1855,7 +1884,7 @@
         </div>
         <div class="diff-bloom" id="quiz-both-bloom">
           <div class="diff-shell" data-on="false">
-            <button class="diff-pill game-pill" data-mode="both">Note + Octave</button>
+            <button class="diff-pill game-pill" data-mode="both">Both</button>
             <button class="diff-caret" id="quiz-both-caret" aria-label="Show details" type="button">▾</button>
           </div>
           <div class="diff-reveal" id="quiz-both-sub" hidden>
@@ -1867,7 +1896,7 @@
 
     <div class="field">
       <div class="field-label">How to differentiate</div>
-      <div class="diff-grid" id="game-mode-toggle">
+      <div class="diff-grid cols3" id="game-mode-toggle">
         <div class="diff-bloom" id="game-casual-bloom">
           <div class="diff-shell" data-on="true">
             <button class="diff-pill game-pill active" data-game="casual">Grind</button>
@@ -1900,7 +1929,7 @@
 
     <div class="field" id="difficulty-field">
       <div class="field-label field-label-row">Difficulty modifiers<span class="unlock-pill note-unlock-pill push-right" id="diff-unlock-pill"></span></div>
-      <div class="diff-grid">
+      <div class="diff-grid cols3">
         <div class="diff-bloom" id="diff-noise-bloom">
         <div class="diff-shell" data-on="false">
           <button class="diff-pill" id="diff-noise" aria-pressed="false">Ambience</button>
